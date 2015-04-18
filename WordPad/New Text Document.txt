@@ -1,0 +1,31 @@
+Dim PrintFont As New Font(Convert.ToString(FontStyleStripComboBox.SelectedItem), Convert.ToSingle(FontSizeToolStripComboBox.SelectedItem))
+        Dim StringToPrint As String = RichTextBox1.Text
+
+        Dim numChars As Integer
+        Dim numLines As Integer
+        Dim stringForPage As String
+        Dim strFormat As New StringFormat
+        'based on page setup, define drawable retangle on page
+        Dim rectDraw As New RectangleF(e.MarginBounds.Left, e.MarginBounds.Top, e.MarginBounds.Width, e.MarginBounds.Height)
+        'define area to determine how much text can fit on a page
+        'Make height one line shorter to enshure text doesn't clip
+        Dim sizeMeasure As New SizeF(e.MarginBounds.Width, e.MarginBounds.Height - PrintFont.GetHeight(e.Graphics))
+
+        'when drawing long strings, break between words
+        strFormat.Trimming = StringTrimming.Word
+        'compute how many char and lines can fit based on sizeMeazure
+        e.Graphics.MeasureString(StringToPrint, PrintFont, sizeMeasure, strFormat, numChars, numLines)
+        'compute string that will fit on a page
+        stringForPage = StringToPrint.Substring(0, numChars)
+        'Print string on current page
+        e.Graphics.DrawString(stringForPage, PrintFont, Brushes.Black, rectDraw, strFormat)
+        'If there is more text, indicate there are more pages
+        If numChars < StringToPrint.Length Then
+            'subtract text from string that has been printed
+            StringToPrint = StringToPrint.Substring(numChars)
+            e.HasMorePages = True
+        Else
+            e.HasMorePages = False
+            'All text has been printed, so restoring string
+            StringToPrint = RichTextBox1.Text
+        End If
